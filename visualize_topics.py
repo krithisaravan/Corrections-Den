@@ -1,0 +1,158 @@
+import pandas as pd
+import re
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
+from sentence_transformers import SentenceTransformer
+import plotly.express as px
+from tqdm import tqdm
+
+
+# Clean and preprocess comments
+def clean_comment(text):
+    if pd.isna(text):
+        return ""
+    text = text.lower()
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+#  Load comments
+def load_comments(path):
+    print("Loading comments data...")
+    df = pd.read_csv(path)
+    print(f"Loaded {len(df)} comments.")
+    df["clean_comment"] = df["comment"].astype(str).apply(clean_comment)
+    df = df[df["clean_comment"].str.len() > 5]
+    return df
+
+# Create embeddings and cluster
+def cluster_comments(df, n_clusters=6):
+    print("Generating sentence embeddings...")
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings = model.encode(df["clean_comment"].tolist(), show_progress_bar=True)
+
+    print(f"Clustering into {n_clusters} topics...")
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    df["cluster"] = kmeans.fit_predict(embeddings)
+    return df, kmeans, embeddings
+
+# Identify top keywords and example comments per cluster (using tf-idf)
+def get_top_keywords_per_cluster(df, n_clusters, top_n=8, n_examples=3):
+    df = df.reset_index(drop=True)
+
+    extra_stops = {
+        "seth", "meyers", "corrections", "week", "love",
+        "great", "good", "best", "show", "episode", "one",
+        "like", "just", "dont", "im", "know"}
+    custom_stopwords = list(ENGLISH_STOP_WORDS.union(extra_stops))
+
+    vectorizer = TfidfVectorizer(
+        stop_words=custom_stopwords,
+        max_df=0.8,
+        min_df=5,
+        ngram_range=(1, 2)
+    )
+
+    tfidf_matrix = vectorizer.fit_transform(df["clean_comment"].fillna(""))
+    feature_names = np.array(vectorizer.get_feature_names_out())
+
+    cluster_summaries = {}
+    for i in range(n_clusters):
+        cluster_docs = df[df["cluster"] == i]
+        if cluster_docs.empty:
+            cluster_summaries[i] = {"keywords": [], "examples": []}
+            continue
+
+        cluster_tfidf = tfidf_matrix[cluster_docs.index.to_list()]
+        mean_tfidf = cluster_tfidf.mean(axis=0)
+        top_indices = np.argsort(mean_tfidf.A1)[-top_n:][::-1]
+        top_words = feature_names[top_indices].tolist()
+
+        # random sample of representative comments
+        examples = cluster_docs["clean_comment"].sample(
+            min(n_examples, len(cluster_docs)), random_state=42
+        ).tolist()
+
+        cluster_summaries[i] = {"keywords": top_words, "examples": examples}
+
+    return cluster_summaries
+
+# Visualize clusters over time
+def visualize_clusters(df, cluster_keywords=None, cluster_labels=None):
+    print("Building visualization...")
+
+    # Chech that there’s a 'date' column in datetime format
+    if "date" not in df.columns:
+        if "publishedAt" in df.columns:
+            df["date"] = pd.to_datetime(df["publishedAt"], errors="coerce")
+        else:
+            raise KeyError("No 'date' or 'publishedAt' column found in dataframe.")
+
+    # Create readable topic labels
+    if cluster_labels:
+        # Use the descriptive labels if provided
+        df["topic_label"] = df["cluster"].map(cluster_labels)
+    elif cluster_keywords:
+        # Otherwise, fallback to top keywords per cluster
+        df["topic_label"] = df["cluster"].map(
+            lambda c: ", ".join(cluster_keywords.get(c, {}).get("keywords", [])[:3])
+        )
+    else:
+        df["topic_label"] = df["cluster"].astype(str)
+
+    # Aggregate counts by month and topic
+    topic_trends = (
+        df.groupby([pd.Grouper(key="date", freq="ME"), "topic_label"])
+        .size()
+        .reset_index(name="comment_count")
+    )
+
+    # Interactive time-based area chart
+    fig = px.area(
+        topic_trends,
+        x="date",
+        y="comment_count",
+        color="topic_label",
+        title='"Corrections" Comment Topics Over Time',
+        markers=True,
+        category_orders={"topic_label": list(cluster_labels.values())}
+    )
+
+
+    fig.update_layout(
+        template="plotly_white",
+        hovermode="x unified",
+        legend_title_text="Topics",
+    )
+
+    fig.show()
+
+
+def main():
+    path = "data/processed/corrections_comments.csv"
+    df = load_comments(path)
+    df, kmeans, embeddings = cluster_comments(df, n_clusters=6)
+    
+    # Get top keywords per cluster
+    cluster_keywords = get_top_keywords_per_cluster(df, n_clusters=6)
+    for i, words in cluster_keywords.items():
+        print(f"Cluster {i}: {', '.join(words)}")
+    
+    # Mapping clusters to corresponding topics
+    cluster_labels = {
+        0: "Animal Flubs",
+        1: "Pronunciation",
+        2: "Watching Corrections",
+        3: "Jackals References",
+        4: "Segments and Emmy's",
+        5: "General Seth Comments/Reactions"
+    }
+    df["topic_label"] = df["cluster"].map(cluster_labels)
+
+    visualize_clusters(df, cluster_keywords=cluster_keywords, cluster_labels=cluster_labels)
+
+
+if __name__ == "__main__":
+    main()
