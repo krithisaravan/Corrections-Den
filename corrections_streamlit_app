@@ -26,7 +26,7 @@ df["date"] = pd.to_datetime(df["publishedAt"], errors="coerce")
 min_date = df["date"].min().date()
 max_date = df["date"].max().date()
 
-st.subheader("📅 Select Date Range")
+st.subheader("Select Date Range")
 start_date, end_date = st.slider(
     "Date range:",
     min_value=min_date,
