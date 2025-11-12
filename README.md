@@ -19,5 +19,5 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
   - Identifies representative keywords and sample comments per cluster.
 
 - **Interactive Visualization (Streamlit App)**
-  - Explore trends and frequencies by **topic**, **date range**, and **frequency** (daily, weekly, monthly).
+  - Explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
   - Built with Plotly for dynamic, interactive visualizations.
