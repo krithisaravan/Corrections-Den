@@ -1,0 +1,110 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+import plotly.express as px
+
+# Import clustering, cleaning, and visualization functions from visualize_topics.py
+from visualize_topics import load_comments, cluster_comments, get_top_keywords_per_cluster
+
+# streamlit page config
+st.set_page_config(page_title="Late Night with Seth Meyers Corrections Comments Analysis", layout="wide")
+st.markdown(
+    "<h1 style='text-align: center; margin-bottom: 0.5em;'>"
+    "<em>Late Night with Seth Meyers</em> 'Corrections' Comments Analysis"
+    "</h1>",
+    unsafe_allow_html=True
+)
+
+# Load data
+path = "data/processed/corrections_comments.csv"
+df = load_comments(path)
+
+# Confirm that 'date' column exists in datetime format
+df["date"] = pd.to_datetime(df["publishedAt"], errors="coerce")
+
+# Date filter
+min_date = df["date"].min().date()
+max_date = df["date"].max().date()
+
+st.subheader("📅 Select Date Range")
+start_date, end_date = st.slider(
+    "Date range:",
+    min_value=min_date,
+    max_value=max_date,
+    value=(min_date, max_date),
+    format="YYYY-MM-DD"
+)
+
+# Filter dataframe
+df_filtered = df[(df["date"].dt.date >= start_date) & (df["date"].dt.date <= end_date)]
+
+# Cluster comments
+n_clusters = 6
+df_filtered, kmeans, embeddings = cluster_comments(df_filtered, n_clusters=n_clusters)
+
+# Get top keywords per cluster
+cluster_keywords = get_top_keywords_per_cluster(df_filtered, n_clusters=n_clusters)
+
+# Polished cluster labels
+cluster_labels = {
+    0: "Animal Flubs",
+    1: "Pronunciation Corrections",
+    2: "Watching Corrections",
+    3: "Jackals References",
+    4: "Segments & Emmy's",
+    5: "General Seth Comments/Reactions"
+}
+df_filtered["topic_label"] = df_filtered["cluster"].map(cluster_labels)
+
+# Frequency selector for aggregation
+st.subheader("Select Aggregation Frequency")
+freq_option = st.selectbox(
+    "Aggregation frequency:",
+    options=["Daily", "Weekly", "Monthly"]
+)
+
+# Determine the frequency string for pd.Grouper
+if freq_option == "Weekly":
+    week_end_day = st.selectbox(
+        "Week ends on:",
+        options=["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    )
+    freq = f"W-{week_end_day}"
+elif freq_option == "Monthly":
+    freq = "ME"
+else:
+    freq = "D"
+
+# Aggregate comments
+topic_trends = (
+    df_filtered.groupby([pd.Grouper(key="date", freq=freq), "topic_label"])
+    .size()
+    .reset_index(name="comment_count")
+)
+
+# Hover date for tooltip display
+topic_trends["hover_date"] = topic_trends["date"].dt.strftime("%Y-%m-%d")
+
+# Plot interactive chart
+fig = px.line(
+    topic_trends,
+    x="date",
+    y="comment_count",
+    color="topic_label",
+    title=f"Comment Topics Over Time ({freq_option})",
+    markers=True,
+    hover_data={
+        "date": False,
+        "hover_date": True,
+        "comment_count": True,
+        "topic_label": False
+    }
+)
+
+fig.update_layout(
+    template="plotly_white",
+    hovermode="x unified",
+    legend_title_text="Topics"
+)
+
+st.plotly_chart(fig, use_container_width=True)
