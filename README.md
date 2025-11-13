@@ -21,3 +21,25 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
 - **Interactive Visualization (Streamlit App)**
   - Explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
   - Built with Plotly for dynamic, interactive visualizations.
+
+## App Preview
+
+<p align="center">
+  <img src="images/cd_daily.png" width="600"><br>
+  <em>Daily aggregation view</em>
+</p>
+
+<p align="center">
+  <img src="images/cd_weekly_2025.png" width="600"><br>
+  <em>Weekly trends (2025)</em>
+</p>
+
+<p align="center">
+  <img src="images/cd_monthly.png" width="600"><br>
+  <em>Monthly overview</em>
+</p>
+
+<p align="center">
+  <img src="images/cd_monthly_2025.png" width="600"><br>
+  <em>Monthly aggregation focused on 2025</em>
+</p>
