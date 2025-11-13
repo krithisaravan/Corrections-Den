@@ -1,4 +1,4 @@
-# *Late Night with Seth Meyers* “Corrections” Comments Analysis
+# Corrections Den: A *Late Night with Seth Meyers* “Corrections” Comments Analysis
 
 This project analyzes viewer comments from the *Late Night with Seth Meyers* YouTube series “Corrections” to uncover recurring themes, audience reactions, and trends in comments over time. Using NLP techniques like TF-IDF, sentence embeddings, and KMeans clustering, the app visualizes how comment topics evolve across episodes.
 
