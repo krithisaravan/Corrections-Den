@@ -40,6 +40,6 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
 </p>
 
 <p align="center">
-  <img src="images/cd_monthly_2025.png" width="900"><br>
+  <img src="images/cd_monthly_2025.png" width="1000"><br>
   <em>Monthly aggregation focused on 2025</em>
 </p>
