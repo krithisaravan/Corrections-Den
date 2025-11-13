@@ -25,17 +25,17 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
 ## App Preview
 
 <p align="center">
-  <img src="images/cd_daily.png" width="900"><br>
+  <img src="images/cd_daily.png" width="1000"><br>
   <em>Daily aggregation view for October 2025</em>
 </p>
 
 <p align="center">
-  <img src="images/cd_weekly_2025.png" width="900"><br>
+  <img src="images/cd_weekly_2025.png" width="1000"><br>
   <em>Weekly trends for 2025</em>
 </p>
 
 <p align="center">
-  <img src="images/cd_monthly.png" width="900"><br>
+  <img src="images/cd_monthly.png" width="1000"><br>
   <em>Monthly overview</em>
 </p>
 
