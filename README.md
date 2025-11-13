@@ -31,7 +31,7 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
 
 <p align="center">
   <img src="images/cd_weekly_2025.png" width="600"><br>
-  <em>Weekly trends (2025)</em>
+  <em>Weekly trends for 2025</em>
 </p>
 
 <p align="center">
