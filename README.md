@@ -26,7 +26,7 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
 
 <p align="center">
   <img src="images/cd_daily.png" width="600"><br>
-  <em>Daily aggregation view</em>
+  <em>Daily aggregation view for October 2025</em>
 </p>
 
 <p align="center">
