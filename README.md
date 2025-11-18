@@ -18,7 +18,7 @@ This project analyzes viewer comments from the *Late Night with Seth Meyers* You
   - Groups comments into topics using sentence embeddings and KMeans.
   - Identifies representative keywords and sample comments per cluster.
 
-- **Interactive Visualization (Streamlit App)**
+- **Interactive Visualization (App)**
   - Explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
   - Built with Plotly for dynamic, interactive visualizations.
 
