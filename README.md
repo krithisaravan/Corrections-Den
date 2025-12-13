@@ -18,11 +18,11 @@
   - Groups comments into topics using sentence embeddings and KMeans.
   - Identifies representative keywords and sample comments per cluster.
 
-- **Interactive Visualization (App)**
+- **Interactive Visualization**
   - Explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
   - Built with Plotly for dynamic, interactive visualizations.
 
-## App Preview
+## [App](https://corrections-den.streamlit.app) Preview
 
 <p align="center">
   <img width="1619" height="874" alt="cd_daily" src="https://github.com/user-attachments/assets/d9562919-49db-4414-9002-90a6d8790aef"><br>
