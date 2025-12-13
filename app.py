@@ -41,7 +41,7 @@ df = load_or_generate_comments()
 # Show last updated timestamp
 csv_path = "data/processed/corrections_comments.csv"
 last_updated = datetime.fromtimestamp(os.path.getmtime(csv_path))
-st.caption(f"🔄 Data last updated: {last_updated.strftime('%Y-%m-%d %H:%M')}")
+st.caption(f"Data last updated on {last_updated.strftime('%Y-%m-%d %H:%M')}")
 
 # Date parsing
 df["date"] = pd.to_datetime(df["publishedAt"], errors="coerce")
