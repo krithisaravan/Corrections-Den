@@ -1,16 +1,20 @@
 import os
 from dotenv import load_dotenv
 import pandas as pd
+import streamlit as st
 from googleapiclient.discovery import build
 from tqdm import tqdm
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 
 
+
 # Load environment
 load_dotenv()
-API_KEY = os.getenv("YOUTUBE_API_KEY")
-CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID")
+#API_KEY = os.getenv("YOUTUBE_API_KEY")
+#CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID")
+API_KEY = st.secrets["YOUTUBE_API_KEY"]
+CHANNEL_ID = st.secrets["YOUTUBE_CHANNEL_ID"]
 
 if not API_KEY or not CHANNEL_ID:
     raise ValueError("Missing API key or channel ID.")
