@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 # Import clustering, cleaning, and visualization functions
 from visualize_topics import load_comments, cluster_comments, get_top_keywords_per_cluster
+from comment_analysis import generate_comment_analysis
 
 # Streamlit page config
 st.set_page_config(
@@ -20,6 +21,10 @@ st.markdown(
     "</h1>",
     unsafe_allow_html=True
 )
+
+# Generate data
+generate_comment_analysis()
+
 
 # Load data
 path = "data/processed/corrections_comments.csv"

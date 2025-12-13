@@ -89,7 +89,7 @@ def cluster_comments(comments: pd.Series, n_clusters=5):
 
 
 # Main pipeline
-def main():
+def generate_comment_analysis():
     print("Collecting 'Corrections' videos...")
     upload_playlist = get_upload_playlist_id(CHANNEL_ID)
     video_df = get_corrections_videos(upload_playlist)
@@ -119,4 +119,4 @@ def main():
     print(f"Saved processed comments to {out_path}")
 
 if __name__ == "__main__":
-    main()
+    generate_comment_analysis()
