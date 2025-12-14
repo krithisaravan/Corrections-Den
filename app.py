@@ -1,66 +1,100 @@
 import os
 import streamlit as st
 import pandas as pd
-import re
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import plotly.express as px
+
+from visualize_topics import (
+    load_comments,
+    cluster_comments,
+    get_top_keywords_per_cluster
+)
 from comment_analysis import generate_comment_analysis
 
-# Streamlit page config
+# --------------------------------------
+# Page config
+# --------------------------------------
 st.set_page_config(
-    page_title="Late Night with Seth Meyers Corrections Comments Analysis",
+    page_title="Corrections Den",
     layout="wide"
 )
 
+# --------------------------------------
+# Header
+# --------------------------------------
 st.markdown(
-    "<h1 style='text-align: center; margin-bottom: 0.5em;'>"
-    "<em>Late Night with Seth Meyers</em> \"Corrections\" Comments Analysis"
-    "</h1>",
+    """
+    <div style="text-align:center">
+        <h1 style="margin-bottom:0.2em;">
+            Corrections Den
+        </h1>
+        <h3 style="font-weight:400; margin-top:0;">
+            <em>Late Night with Seth Meyers</em> "Corrections" Comment Analysis
+        </h3>
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
-# Simple function to load pre-computed comments with clusters
-def load_comments(path):
-    df = pd.read_csv(path)
-    # Ensure clean_comment column exists for backward compatibility
-    if "clean_comment" not in df.columns and "comment" in df.columns:
-        df["clean_comment"] = df["comment"].astype(str).apply(
-            lambda x: re.sub(r"http\S+", "", x.lower())
-        )
-    return df
+# --------------------------------------
+# Sidebar — data controls
+# --------------------------------------
+with st.sidebar:
+    st.header("Data Controls")
 
-# Cached data loader
-@st.cache_data(ttl=86400)  # cache for 24 hours
-def load_or_generate_comments():
-    csv_path = "data/processed/corrections_comments.csv"
-
-    if not os.path.exists(csv_path):
-        with st.spinner("Fetching YouTube comments (first-time setup)…"):
+    if st.button("🔄 Refresh data (uses YouTube quota)"):
+        with st.spinner("Fetching new comments from YouTube…"):
             generate_comment_analysis()
+        st.cache_data.clear()
+        st.success("Data refreshed. Reload the page.")
 
-    return load_comments(csv_path)
+# --------------------------------------
+# Load data (NO API CALLS HERE)
+# --------------------------------------
+@st.cache_data(ttl=86400)  # 24 hours
+def load_cached_comments():
+    path = "data/processed/corrections_comments.csv"
 
+    if not os.path.exists(path):
+        st.error(
+            "Data file not found.\n\n"
+            "Please click **Refresh data** in the sidebar to initialize the dataset."
+        )
+        st.stop()
 
-df = load_or_generate_comments()
+    return load_comments(path)
 
-# Show last updated timestamp
-csv_path = "data/processed/corrections_comments.csv"
-last_updated = datetime.fromtimestamp(os.path.getmtime(csv_path))
-st.caption(f"Data last updated on {last_updated.strftime('%Y-%m-%d %H:%M')}")
+df = load_cached_comments()
 
+# --------------------------------------
+# Last updated timestamp
+# --------------------------------------
+last_updated = datetime.fromtimestamp(
+    os.path.getmtime("data/processed/corrections_comments.csv")
+)
+
+st.caption(
+    f"📅 Data last updated: **{last_updated.strftime('%Y-%m-%d %H:%M')}**"
+)
+
+# --------------------------------------
 # Date parsing
+# --------------------------------------
 df["date"] = pd.to_datetime(df["publishedAt"], errors="coerce")
 if df["date"].dt.tz is not None:
     df["date"] = df["date"].dt.tz_localize(None)
 
+# --------------------------------------
 # Date range selector
+# --------------------------------------
 min_date = df["date"].min().date()
 max_date = df["date"].max().date()
 
 st.subheader("Select Date Range")
+
 start_date, end_date = st.slider(
-    "Date range:",
+    "Date range",
     min_value=min_date,
     max_value=max_date,
     value=(min_date, max_date),
@@ -75,30 +109,37 @@ df_filtered = df[
     (df["date"].dt.date <= end_date)
 ].copy()
 
-# Use pre-computed cluster assignments from CSV
-# (clusters were computed during data collection using sentence embeddings)
+# --------------------------------------
+# Topic clustering (cheap, local)
+# --------------------------------------
+n_clusters = 6
+df_filtered, _, _ = cluster_comments(df_filtered, n_clusters=n_clusters)
+
 cluster_labels = {
     0: "Animal Flubs",
     1: "Pronunciation Corrections",
     2: "Watching Corrections",
     3: "Jackals References",
-    4: "Segments & Emmy’s Discussion",
+    4: "Segments & Emmy's Discussion",
     5: "General Seth Comments / Reactions"
 }
 
 df_filtered["topic_label"] = df_filtered["cluster"].map(cluster_labels)
 
-# Aggregation frequency selector
-st.subheader("Select Aggregation Frequency")
+# --------------------------------------
+# Aggregation selector
+# --------------------------------------
+st.subheader("Aggregation Frequency")
+
 freq_option = st.selectbox(
-    "Aggregation frequency:",
-    options=["Daily", "Weekly", "Monthly"]
+    "Frequency",
+    ["Daily", "Weekly", "Monthly"]
 )
 
 if freq_option == "Weekly":
     week_end_day = st.selectbox(
-        "Week ends on:",
-        options=["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+        "Week ends on",
+        ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     )
     freq = f"W-{week_end_day}"
 
@@ -108,7 +149,9 @@ elif freq_option == "Monthly":
 else:
     freq = "D"
 
-# Aggregate data
+# --------------------------------------
+# Aggregation logic
+# --------------------------------------
 if freq_option == "Monthly":
     df_filtered["date"] = df_filtered["date"].dt.tz_localize(None)
     start_ts = start_ts.tz_localize(None)
@@ -118,6 +161,7 @@ if freq_option == "Monthly":
     while current <= end_ts:
         month_starts.append(current)
         current += relativedelta(months=1)
+
     month_starts.append(end_ts + timedelta(days=1))
 
     df_filtered["month_start"] = pd.cut(
@@ -148,12 +192,18 @@ topic_trends = (
 if freq_option == "Monthly":
     topic_trends = topic_trends.rename(columns={"month_start": "date"})
 
-topic_trends["hover_date"] = (
-    pd.to_datetime(topic_trends["date"])
-    .dt.strftime("%Y-%m-%d")
-)
+# --------------------------------------
+# Plot (original behavior preserved)
+# --------------------------------------
+seth_palette = [
+    "#1f4fd8",  # NBC blue
+    "#e63946",
+    "#457b9d",
+    "#2a9d8f",
+    "#f4a261",
+    "#6d597a"
+]
 
-# Plot
 fig = px.line(
     topic_trends,
     x="date",
@@ -161,12 +211,7 @@ fig = px.line(
     color="topic_label",
     title=f"Comment Topics Over Time ({freq_option})",
     markers=True,
-    hover_data={
-        "date": False,
-        "hover_date": True,
-        "comment_count": True,
-        "topic_label": False
-    },
+    color_discrete_sequence=seth_palette,
     labels={
         "date": "Date",
         "comment_count": "Comment Count",
@@ -178,45 +223,37 @@ fig = px.line(
 strike_start = pd.Timestamp("2023-05-02")
 strike_end = pd.Timestamp("2023-09-27")
 
-if (end_date >= strike_start.date()) and (start_date <= strike_end.date()):
+if start_date <= strike_end.date() and end_date >= strike_start.date():
     fig.add_vrect(
         x0=strike_start,
         x1=strike_end,
         fillcolor="gray",
-        opacity=0.25,
+        opacity=0.2,
         layer="below",
         line_width=0,
         annotation_text="WGA Strike (2023)",
         annotation_position="top left"
     )
 
-# Axis formatting
-tickvals = pd.date_range(
-    start=pd.Timestamp(start_date).replace(day=1),
-    end=pd.Timestamp(end_date),
-    freq="MS"
-)
-
 fig.update_layout(
     template="plotly_white",
     hovermode="x unified",
-    legend_title_text="Topics"
+    legend_title_text="Topics",
+    width=1400
 )
 
 fig.update_xaxes(
-    range=[
-        pd.Timestamp(start_date),
-        pd.Timestamp(end_date) + pd.Timedelta(days=1)
-    ],
-    tickvals=tickvals,
-    tickformat="%b %Y",
     tickangle=-45,
     showline=True,
     mirror=True,
-    linecolor="black",
-    title_text="Date"
+    linecolor="black"
 )
 
-fig.update_yaxes(title_text="Comment Count")
+fig.update_yaxes(
+    showline=True,
+    mirror=True,
+    linecolor="black"
+)
 
 st.plotly_chart(fig, use_container_width=True)
+
