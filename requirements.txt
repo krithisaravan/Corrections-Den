@@ -1,10 +1,5 @@
-google_api_python_client
-numpy
+# Runtime requirements (lightweight for deployment)
 pandas
 plotly
-python-dotenv
 python_dateutil
-scikit_learn
-sentence_transformers
 streamlit
-tqdm

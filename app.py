@@ -1,15 +1,11 @@
 import os
 import streamlit as st
 import pandas as pd
+import re
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import plotly.express as px
 from comment_analysis import generate_comment_analysis
-from visualize_topics import (
-    load_comments,
-    cluster_comments,
-    get_top_keywords_per_cluster
-)
 
 # Streamlit page config
 st.set_page_config(
@@ -19,10 +15,20 @@ st.set_page_config(
 
 st.markdown(
     "<h1 style='text-align: center; margin-bottom: 0.5em;'>"
-    "<em>Late Night with Seth Meyers</em> “Corrections” Comments Analysis"
+    "<em>Late Night with Seth Meyers</em> "Corrections" Comments Analysis"
     "</h1>",
     unsafe_allow_html=True
 )
+
+# Simple function to load pre-computed comments with clusters
+def load_comments(path):
+    df = pd.read_csv(path)
+    # Ensure clean_comment column exists for backward compatibility
+    if "clean_comment" not in df.columns and "comment" in df.columns:
+        df["clean_comment"] = df["comment"].astype(str).apply(
+            lambda x: re.sub(r"http\S+", "", x.lower())
+        )
+    return df
 
 # Cached data loader
 @st.cache_data(ttl=86400)  # cache for 24 hours
@@ -69,13 +75,8 @@ df_filtered = df[
     (df["date"].dt.date <= end_date)
 ].copy()
 
-# Cluster comments (labels identified by comment_analysis)
-n_clusters = 6
-df_filtered, kmeans, embeddings = cluster_comments(
-    df_filtered,
-    n_clusters=n_clusters
-)
-
+# Use pre-computed cluster assignments from CSV
+# (clusters were computed during data collection using sentence embeddings)
 cluster_labels = {
     0: "Animal Flubs",
     1: "Pronunciation Corrections",
