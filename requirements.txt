@@ -1,10 +1,11 @@
 google_api_python_client
-numpy
+numpy<2.1
 pandas
 plotly
 python-dotenv
 python_dateutil
-scikit_learn
+scikit-learn==1.5.2
 sentence_transformers
-streamlit
+streamlit==1.23.1
 tqdm
+pyarrow==14.0.2  # Add this line to pin compatible pyarrow
