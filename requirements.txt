@@ -1,5 +1,11 @@
-# Runtime requirements (lightweight for deployment)
+google_api_python_client
+numpy<2.1
 pandas
 plotly
+python-dotenv
 python_dateutil
-streamlit
+scikit-learn==1.5.2
+sentence_transformers
+streamlit==1.23.1
+tqdm
+pyarrow==14.0.2  # Add this line to pin compatible pyarrow
