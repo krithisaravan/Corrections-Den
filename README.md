@@ -20,7 +20,7 @@ The Corrections Den offers an analysis of viewer comments from the *Late Night w
 - **Interactive Visualization**
   - A dynamic visualization on Plotly allows users to explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
 
-## [App](https://corrections-den.streamlit.app) Preview
+## App Demo
 
 <!--
 <p align="center">
