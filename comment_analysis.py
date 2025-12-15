@@ -117,6 +117,33 @@ def summarize_clusters(df, vectorizer, kmeans, X, n_terms=10, n_examples=5):
         for c in examples:
             print(f"  - {c[:200]}")
 
+def infer_topic_labels(vectorizer, kmeans, n_terms=10):
+    feature_names = np.array(vectorizer.get_feature_names_out())
+
+    topic_map = {}
+
+    for cluster_id in range(kmeans.n_clusters):
+        center = kmeans.cluster_centers_[cluster_id]
+        top_terms = feature_names[center.argsort()[::-1][:n_terms]]
+
+        terms = set(top_terms)
+
+        if {"animal", "flubs", "baby", "teeth"}.intersection(terms):
+            label = "Animal Flubs & Recurring Bits"
+        elif {"mug", "mugs", "jackal", "jackals", "nbc"}.intersection(terms):
+            label = "Jackals References and Merchandise"
+        elif {"laugh", "happy", "crew", "thanks"}.intersection(terms):
+            label = "LNSM Crew Reactions"
+        elif {"correction", "correct", "didn", "said"}.intersection(terms):
+            label = "Commentary or Corrections on Corrections"
+        else:
+            label = "Joke Reactions"
+
+        topic_map[cluster_id] = label
+
+    return topic_map
+
+
 # Main pipeline
 def generate_comment_analysis():
     os.makedirs("data/raw", exist_ok=True)
@@ -158,6 +185,15 @@ def generate_comment_analysis():
     )
     comments_df["cluster"] = labels
     print("Clustered comments into topics.")
+
+    topic_labels = infer_topic_labels(vectorizer, kmeans)
+
+    label_df = pd.DataFrame.from_dict(
+    topic_labels, orient="index", columns=["topic_label"]
+).reset_index().rename(columns={"index": "cluster"})
+
+    label_df.to_csv("data/processed/cluster_labels.csv", index=False)
+
 
     # Summarize
     summarize_clusters(comments_df, vectorizer, kmeans, X)
