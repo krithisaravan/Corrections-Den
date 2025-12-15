@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 import plotly.express as px
 
 from comment_analysis import generate_comment_analysis
-from visualize_topics import load_comments 
 
 st.set_page_config(
     page_title="Corrections Den",
