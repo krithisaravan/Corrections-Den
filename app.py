@@ -75,7 +75,6 @@ st.markdown(
         margin: 0 auto 2.5rem auto;
         font-size: 1.05rem;
         line-height: 1.6;
-        color: rgba(255, 255, 255, 0.85);
     ">
         <em> Corrections Den </em> analyzes YouTube comments from Seth Meyer's YouTube-only segment “Corrections," 
         grouping thousands of viewer remarks into the most frequently-recurring themes (identified using TF-IDF and K-means clustering) 
