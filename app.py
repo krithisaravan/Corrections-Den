@@ -76,7 +76,7 @@ st.markdown(
         font-size: 1.05rem;
         line-height: 1.6;
     ">
-        <em> Corrections Den </em> analyzes YouTube comments from Seth Meyer's YouTube-only segment “Corrections," 
+        <em> Corrections Den </em> analyzes YouTube comments from Seth Meyers' YouTube-only segment “Corrections," 
         grouping thousands of viewer remarks into the most frequently-recurring themes (identified using TF-IDF and K-means clustering) 
         and tracking how those topics evolve over time. Explore daily, weekly, or monthly trends to see what audiences fixate on and how 
         conversation has shifted across episodes. Click on topics in the legend to filter and compare their trends on the plot.
