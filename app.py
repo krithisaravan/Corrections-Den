@@ -91,18 +91,18 @@ with st.sidebar:
     st.header("Data Controls")
 
     if st.button("Refresh data (uses YouTube quota)"):
-        with st.spinner("Fetching new comments from YouTube…"):
+        with st.spinner("Fetching new comments from YouTube. This may take up to ten minutes."):
             generate_comment_analysis()
         st.cache_data.clear()
         st.success("Data refreshed. Reload the page.")
 
 # Load cached data (already clustered)
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=604800)
 def load_cached_comments():
     path = "data/processed/corrections_comments.csv"
     if not os.path.exists(path):
         st.error(
-            "Data file not found.\n\n"
+            "Data file is outdated.\n\n"
             "Click **Refresh data** in the sidebar to initialize."
         )
         st.stop()
@@ -160,11 +160,11 @@ df_filtered = df[
 ].copy()
 
 # Assign cluster labels in accordance with comment_analysis.py output
-@st.cache_data
+@st.cache_data(ttl=604800)
 def load_cluster_labels():
     path = "data/processed/cluster_labels.csv"
     if not os.path.exists(path):
-        st.error("Cluster labels not found. Refresh data.")
+        st.error("Cluster labels not found. Refresh data in the sidebar.")
         st.stop()
     return pd.read_csv(path)
 
