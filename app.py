@@ -12,13 +12,27 @@ st.set_page_config(
     layout="wide"
 )
 
+
+
 st.markdown(
     """
     <style>
-    html, body, [class*="css"] {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                     Roboto, Helvetica, Arial, sans-serif;
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+
+    .stApp {
+        font-family: 'Space Grotesk', sans-serif;
     }
+
+    /* Headings */
+    .stApp h1, 
+    .stApp h2, 
+    .stApp h3, 
+    .stApp h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        letter-spacing: -0.02em;
+    }
+
+    /* KPI styling stays custom */
     .kpi-container {
         display: flex;
         justify-content: center;
@@ -26,24 +40,28 @@ st.markdown(
         margin-top: 1.5rem;
         margin-bottom: 2rem;
     }
+
     .kpi-box {
         text-align: center;
     }
+
     .kpi-value {
-        font-size: 2.2rem;
+        font-size: 2.4rem;
         font-weight: 700;
         color: #1f4fd8;
     }
+
     .kpi-label {
-        font-size: 0.9rem;
-        color: #555;
-        letter-spacing: 0.05em;
+        font-size: 0.85rem;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
+        opacity: 0.85;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 st.markdown(
     """
@@ -62,7 +80,7 @@ st.markdown(
         <em> Corrections Den </em> analyzes YouTube comments from Seth Meyer's YouTube-only segment “Corrections," 
         grouping thousands of viewer remarks into the most frequently-recurring themes (identified using TF-IDF and K-means clustering) 
         and tracking how those topics evolve over time. Explore daily, weekly, or monthly trends to see what audiences fixate on and how 
-        conversation has shifted across episodes.
+        conversation has shifted across episodes. Click on topics in the legend to filter and compare their trends on the plot.
     </p>
     """,
     unsafe_allow_html=True
@@ -142,15 +160,22 @@ df_filtered = df[
 ].copy()
 
 # Assign cluster labels in accordance with comment_analysis.py output
-cluster_labels = {
-    0: "Joke Reactions",
-    1: "Animal Flubs & Recurring Bits",
-    2: "Commentary or Corrections on Corrections",
-    3: "Jackals References and Merchandise",
-    4: "LNSM Crew Reactions"
-}
+@st.cache_data
+def load_cluster_labels():
+    path = "data/processed/cluster_labels.csv"
+    if not os.path.exists(path):
+        st.error("Cluster labels not found. Refresh data.")
+        st.stop()
+    return pd.read_csv(path)
 
-df_filtered["topic_label"] = df_filtered["cluster"].map(cluster_labels)
+labels_df = load_cluster_labels()
+
+df_filtered = df_filtered.merge(
+    labels_df,
+    on="cluster",
+    how="left"
+)
+
 
 # Aggregation selector
 st.subheader("Aggregation Frequency")
