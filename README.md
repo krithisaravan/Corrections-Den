@@ -1,26 +1,24 @@
 # Corrections Den: An Analysis of *Late Night with Seth Meyers* “Corrections” Comments
 
-[The Corrections Den](https://corrections-den.streamlit.app) offers an analysis of viewer comments from the *Late Night with Seth Meyers* YouTube series “Corrections” to uncover recurring themes, audience reactions, and trends in comments over time. Using NLP techniques like TF-IDF, sentence embeddings, and KMeans clustering, the app visualizes how comment topics evolve across episodes.
+The Corrections Den offers an analysis of viewer comments from the *Late Night with Seth Meyers* YouTube series “Corrections,” using TF-IDF and KMeans clustering to determine the most dominant topics in comments left throughout the series. Topic trends are visualized in Plotly to illustrate how how comment topics have evolved over the years.
 
 ---
 
-## Features 
+## Overview 
 
 - **Automated YouTube Data Collection**
-  - Fetches video metadata and comments using the YouTube Data API.
-  - Filters for “Corrections” videos specifically.
+  - YouTube API fetches video metadata and comments using the YouTube Data API. Only comments left on “Corrections” videos are analyzed.
 
 - **Text Cleaning & Preprocessing**
-  - Removes noise (links, punctuation, emojis).
-  - Normalizes and tokenizes viewer comments.
+  - Comments undergo tokenization and normalization, followed by TF-IDF vectorization.
+  - Text is filtered using a custom stopword list tailored to the "Corrections" comment domain to suppress generic filler language while preserving recurring in-jokes and references.
 
 - **Topic Clustering**
-  - Groups comments into topics using sentence embeddings and KMeans.
-  - Identifies representative keywords and sample comments per cluster.
+  - Comments are grouped into topics using TF-IDF and KMeans. This approach was selected after experimentation with embedding-based models, which tended to over-smooth highly referential, joke-heavy comments. TF-IDF was better suited for extracting frequently-recurring terms within a large dataset comprising many short, noisy documents.
+  - Clusters are computed once on the full corpus to ensure stability. Representative keywords are extracted from each cluster centroid, and a sample of comments aid in the qualitative interpretation of topics.
 
 - **Interactive Visualization**
-  - Explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
-  - Built with Plotly for dynamic, interactive visualizations.
+  - A dynamic visualization on Plotly allows users to explore trends and frequencies by topic, date range, and frequency (daily, weekly, monthly).
 
 ## [App](https://corrections-den.streamlit.app) Preview
 
@@ -47,7 +45,7 @@
 -->
 <p align="center">
   <img width="1609" height="898" alt="Screenshot 2025-12-14 at 7 34 58 PM" src="https://github.com/user-attachments/assets/91d8bce6-e3fc-45c3-a54c-5183d850204e" />
-  Monthly view of <em>Corrections</em> topic trends from 2021 to 2025
+  <em>Monthly view of "Corrections" topic trends from 2021 to 2025</em>
 </p>
 
 
