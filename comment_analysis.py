@@ -118,6 +118,9 @@ def summarize_clusters(df, vectorizer, kmeans, X, n_terms=10, n_examples=5):
             print(f"  - {c[:200]}")
 
 def infer_topic_labels(vectorizer, kmeans, n_terms=10):
+    """
+    All labels were determined based on cluster summaries obtained by running comment_analysis.py.
+    """
     feature_names = np.array(vectorizer.get_feature_names_out())
 
     topic_map = {}
