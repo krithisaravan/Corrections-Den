@@ -24,6 +24,7 @@
 
 ## [App](https://corrections-den.streamlit.app) Preview
 
+<!--
 <p align="center">
   <img width="1619" height="874" alt="cd_daily" src="https://github.com/user-attachments/assets/d9562919-49db-4414-9002-90a6d8790aef"><br>
   <em>Daily aggregation view for October 2025</em>
@@ -43,4 +44,11 @@
   <img width="1622" height="879" alt="cd_monthly_2025" src="https://github.com/user-attachments/assets/743e51a9-ece9-4510-8088-005c3ac1d2a7"><br>
   <em>Monthly aggregation focused on 2025</em>
 </p>
+-->
+<p align="center">
+  <img width="1609" height="898" alt="Screenshot 2025-12-14 at 7 34 58 PM" src="https://github.com/user-attachments/assets/91d8bce6-e3fc-45c3-a54c-5183d850204e" />
+  Monthly view of <em>Corrections</em> topic trends from 2021 to 2025
+</p>
+
+
 
