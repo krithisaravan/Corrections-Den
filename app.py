@@ -82,7 +82,7 @@ st.markdown(
         conversation has shifted across episodes. Click on topics in the legend to filter and compare their trends on the plot.
     </p>
 
-    <p style="margin-top: 0.75rem;">
+    <p style="text-align: center; margin-top: 0.75rem;">
     <strong>Data is updated weekly in line with weekly episode releases.</strong>
     </p>
     
