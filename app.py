@@ -80,8 +80,12 @@ st.markdown(
         grouping thousands of viewer remarks into the most frequently-recurring themes (identified using TF-IDF and K-means clustering) 
         and tracking how those topics evolve over time. Explore daily, weekly, or monthly trends to see what audiences fixate on and how 
         conversation has shifted across episodes. Click on topics in the legend to filter and compare their trends on the plot.
-        <strong> Data is updated weekly in line with weekly episode releases. </strong>
     </p>
+
+    <p style="margin-top: 0.75rem;">
+    <strong>Data is updated weekly in line with weekly episode releases.</strong>
+    </p>
+    
     """,
     unsafe_allow_html=True
 )
