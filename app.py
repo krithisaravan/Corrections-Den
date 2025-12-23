@@ -101,10 +101,22 @@ def data_is_stale(path, max_age_days):
     age = datetime.now() - last_modified
     return age > timedelta(days=max_age_days)
 
+#if data_is_stale(DATA_PATH, MAX_AGE_DAYS):
+    #with st.spinner("Weekly update: fetching new YouTube comments..."):
+        #generate_comment_analysis()
+    #st.cache_data.clear()
+
+RAW_CACHE_PATH = "data/raw/corrections_comments_raw.csv"
+
 if data_is_stale(DATA_PATH, MAX_AGE_DAYS):
+    if os.path.exists(RAW_CACHE_PATH):
+        os.remove(RAW_CACHE_PATH)
+
     with st.spinner("Weekly update: fetching new YouTube comments..."):
         generate_comment_analysis()
+
     st.cache_data.clear()
+
 
 # Sidebar controls
 with st.sidebar:
