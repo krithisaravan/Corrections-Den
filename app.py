@@ -118,13 +118,13 @@ if data_is_stale(DATA_PATH, MAX_AGE_DAYS):
     st.cache_data.clear()
 
 
-# Sidebar controls
+# Sidebar
 with st.sidebar:
     st.header("Data Controls")
 
-    if st.button("Refresh data (uses YouTube quota)"):
+    if st.button("Refresh comment data (uses YouTube API quota)"):
         with st.spinner("Fetching new comments from YouTube. This may take up to ten minutes."):
-            generate_comment_analysis()
+            generate_comment_analysis(force_refresh=True)
         st.cache_data.clear()
         st.success("Data refreshed. Reload the page.")
 
