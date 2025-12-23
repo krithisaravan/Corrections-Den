@@ -1,7 +1,7 @@
 import os
 import streamlit as st
 import pandas as pd
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import plotly.express as px
 
@@ -90,6 +90,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+DATA_PATH = "data/processed/corrections_comments.csv"
+MAX_AGE_DAYS = 7
+
+def data_is_stale(path, max_age_days):
+    if not os.path.exists(path):
+        return True
+
+    last_modified = datetime.fromtimestamp(os.path.getmtime(path))
+    age = datetime.now() - last_modified
+    return age > timedelta(days=max_age_days)
+
+if data_is_stale(DATA_PATH, MAX_AGE_DAYS):
+    with st.spinner("Weekly update: fetching new YouTube comments..."):
+        generate_comment_analysis()
+    st.cache_data.clear()
+
 # Sidebar controls
 with st.sidebar:
     st.header("Data Controls")
@@ -99,6 +115,7 @@ with st.sidebar:
             generate_comment_analysis()
         st.cache_data.clear()
         st.success("Data refreshed. Reload the page.")
+
 
 # Load cached data (already clustered)
 @st.cache_data(ttl=604800)
