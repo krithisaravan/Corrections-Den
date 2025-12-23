@@ -148,12 +148,12 @@ def infer_topic_labels(vectorizer, kmeans, n_terms=10):
 
 
 # Main pipeline
-def generate_comment_analysis():
+def generate_comment_analysis(force_refresh=False):
     os.makedirs("data/raw", exist_ok=True)
     os.makedirs("data/processed", exist_ok=True)
 
-    # ---- LOAD OR FETCH COMMENTS ----
-    if os.path.exists(RAW_CACHE_PATH):
+    #Load or fetch comments
+    if os.path.exists(RAW_CACHE_PATH) and not force_refresh:
         print(f"Loaded cached comments from {RAW_CACHE_PATH}")
         comments_df = pd.read_csv(RAW_CACHE_PATH)
     else:
@@ -192,11 +192,10 @@ def generate_comment_analysis():
     topic_labels = infer_topic_labels(vectorizer, kmeans)
 
     label_df = pd.DataFrame.from_dict(
-    topic_labels, orient="index", columns=["topic_label"]
-).reset_index().rename(columns={"index": "cluster"})
+        topic_labels, orient="index", columns=["topic_label"]
+    ).reset_index().rename(columns={"index": "cluster"})
 
     label_df.to_csv("data/processed/cluster_labels.csv", index=False)
-
 
     # Summarize
     summarize_clusters(comments_df, vectorizer, kmeans, X)
@@ -204,6 +203,7 @@ def generate_comment_analysis():
     # Save processed comments
     comments_df.to_csv(PROCESSED_PATH, index=False)
     print(f"\nSaved processed comments to {PROCESSED_PATH}")
+
 
 
 if __name__ == "__main__":
